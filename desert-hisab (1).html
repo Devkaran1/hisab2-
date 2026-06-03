@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="desert" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desert Hisab</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* THEMES */
+:root[data-theme="desert"]{--bg:#FDF6EC;--bg2:#F5ECD8;--surface:#FFF;--s2:#FBF4E8;--border:#E8D9C0;--b2:#D4C4A8;--text:#2C1A08;--muted:#8A6A48;--accent:#D4500A;--a2:#E8891A;--green:#2A7A3A;--blue:#1A5A9A;--sh:0 2px 12px rgba(100,60,10,.1);--shlg:0 8px 40px rgba(100,60,10,.18);--grp:#EBF6EE;--grpb:#A8D8B8;--prv:#FEF3E8;--prvb:#F0C898}
+:root[data-theme="ocean"]{--bg:#EAF4FB;--bg2:#D8ECF8;--surface:#FFF;--s2:#EEF7FC;--border:#B8D8EE;--b2:#98C4E4;--text:#082840;--muted:#4A7898;--accent:#0A6EA8;--a2:#18A0D8;--green:#0A8A48;--blue:#1448A8;--sh:0 2px 12px rgba(10,60,100,.1);--shlg:0 8px 40px rgba(10,60,100,.18);--grp:#E8F8F0;--grpb:#98D8B8;--prv:#EEF4FF;--prvb:#A8C4F0}
+:root[data-theme="night"]{--bg:#0A0C10;--bg2:#121520;--surface:#181C28;--s2:#1E2230;--border:#2A3040;--b2:#384050;--text:#E8EAF0;--muted:#6878A0;--accent:#FF7040;--a2:#FFB040;--green:#40D870;--blue:#6098FF;--sh:0 2px 12px rgba(0,0,0,.5);--shlg:0 8px 40px rgba(0,0,0,.7);--grp:#0C1E14;--grpb:#1A4828;--prv:#1E1208;--prvb:#503018}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Baloo 2',sans-serif;min-height:100vh;transition:background .3s,color .3s}
+[data-lang="hi"] *{font-family:'Noto Sans Devanagari','Baloo 2',sans-serif}
+button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:200;background:var(--surface);border-bottom:2px solid var(--border);height:58px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh)}
+.logo{font-size:1.25rem;font-weight:800;display:flex;align-items:center;gap:6px;color:var(--accent)}
+.hbtn{background:var(--s2);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:6px 11px;font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:5px;transition:all .2s}
+.hbtn:hover{background:var(--border)}
+.hdr{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.tdot{width:15px;height:15px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0}
+.tdot.on{border-color:var(--text);transform:scale(1.25)}
+
+/* MAIN TABS */
+.mtabs{display:flex;background:var(--s2);border-bottom:2px solid var(--border)}
+.mtab{flex:1;padding:12px 8px;text-align:center;border:none;background:transparent;color:var(--muted);font-size:0.95rem;font-weight:700;border-bottom:3px solid transparent;transition:all .2s}
+.mtab.on{color:var(--accent);border-bottom:3px solid var(--accent);background:var(--surface)}
+.mtab .ti{font-size:1.2rem;display:block;margin-bottom:1px}
+
+/* APP */
+.app{max-width:940px;margin:0 auto;padding:18px 13px 60px}
+
+/* CARD */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--sh);margin-bottom:14px}
+.card-g{background:var(--grp);border-color:var(--grpb)}
+.card-p{background:var(--prv);border-color:var(--prvb)}
+.card-title{font-size:1rem;font-weight:800;margin-bottom:12px}
+
+/* BTNS */
+.btn{padding:9px 16px;border-radius:11px;border:none;font-weight:700;font-size:0.88rem;display:inline-flex;align-items:center;gap:6px;transition:all .18s}
+.btn-full{width:100%;justify-content:center}
+.btn-ac{background:var(--accent);color:#fff}.btn-ac:hover{opacity:.85;transform:translateY(-1px)}
+.btn-gr{background:var(--green);color:#fff}.btn-gr:hover{opacity:.85;transform:translateY(-1px)}
+.btn-bl{background:var(--blue);color:#fff}.btn-bl:hover{opacity:.85;transform:translateY(-1px)}
+.btn-gh{background:var(--s2);color:var(--text);border:1.5px solid var(--border)}.btn-gh:hover{background:var(--border)}
+.btn-sm{padding:6px 11px;font-size:0.78rem;border-radius:9px}
+.btn-wa{background:#25D366;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:0.82rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer;transition:opacity .2s}.btn-wa:hover{opacity:.85}
+.btn-pdf{background:#E53E3E;color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:0.82rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer;transition:opacity .2s}.btn-pdf:hover{opacity:.85}
+.btns-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+.fg label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.fg input,.fg select,.fg textarea{background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:8px 11px;border-radius:9px;font-size:0.92rem;outline:none;transition:border-color .2s;width:100%}
+.fg input:focus,.fg select:focus{border-color:var(--accent)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.sl{font-size:0.67rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin-bottom:2px}
+.sv{font-family:'DM Mono',monospace;font-size:1.4rem;font-weight:500}
+
+/* GROUP CARDS */
+.gc{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:15px;margin-bottom:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gc:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh)}
+.gc.pub{border-left:4px solid var(--green)}.gc.priv{border-left:4px solid var(--accent)}
+.gn{font-size:1rem;font-weight:800}.gi{font-size:0.75rem;color:var(--muted);margin-top:3px}
+.gt{font-family:'DM Mono',monospace;font-size:1.05rem;color:var(--accent)}
+
+/* ENTRIES */
+.elist{display:flex;flex-direction:column;gap:7px;max-height:360px;overflow-y:auto;padding-right:2px}
+.ei{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;animation:pop .2s}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.el{flex:1;min-width:0}
+.ew{font-size:0.76rem;font-weight:700;color:var(--blue);margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.ed{font-size:0.88rem;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.em{font-size:0.68rem;color:var(--muted);font-family:'DM Mono',monospace}
+.ea{font-family:'DM Mono',monospace;font-size:1rem;color:var(--accent);font-weight:500;white-space:nowrap}
+.delbtn{background:none;border:none;color:var(--muted);font-size:0.88rem;padding:3px 5px;border-radius:5px;transition:color .15s}.delbtn:hover{color:#DC2626}
+.empty{text-align:center;padding:26px;color:var(--muted);font-size:0.88rem}
+.ei-icon{font-size:2rem;display:block;margin-bottom:6px}
+
+/* AVATAR */
+.av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:#fff}
+.av-s{width:20px;height:20px;font-size:0.6rem}
+.av0{background:#D4500A}.av1{background:#1A5A9A}.av2{background:#2A7A3A}.av3{background:#7A30A0}
+.av4{background:#A07810}.av5{background:#C03860}.av6{background:#187A8A}.av7{background:#4A6920}
+.av8{background:#8A301A}.av9{background:#205080}
+
+/* OVERLAY/MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:13px}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:18px;padding:22px;width:min(95vw,450px);box-shadow:var(--shlg);transform:scale(.95) translateY(8px);transition:transform .25s;max-height:90vh;overflow-y:auto}
+.overlay.open .modal{transform:scale(1) translateY(0)}
+.mtitle{font-size:1.1rem;font-weight:800;margin-bottom:16px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+
+/* USER LIST */
+.ulist{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
+.uopt{padding:10px 12px;border-radius:10px;cursor:pointer;border:1.5px solid var(--border);background:var(--s2);display:flex;align-items:center;gap:9px;transition:all .18s}
+.uopt:hover,.uopt.on{border-color:var(--accent);background:var(--surface)}
+.un{font-weight:600;font-size:0.88rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* MEMBER GRID */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:220px;overflow-y:auto;margin-top:5px}
+.mc{display:flex;align-items:center;gap:6px;padding:7px 9px;border-radius:8px;cursor:pointer;border:1.5px solid var(--border);background:var(--s2);transition:all .18s;user-select:none}
+.mc.on{border-color:var(--green);background:var(--grp)}
+.mc input{display:none}.mcn{font-size:0.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* SPLIT */
+.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.sname{font-weight:600;font-size:0.88rem;display:flex;align-items:center;gap:6px}
+.samt{font-family:'DM Mono',monospace;font-size:0.88rem}
+
+/* PIN SCREEN */
+.pinscr{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 0}
+.pin-icon{font-size:2.6rem}.pin-title{font-size:1.05rem;font-weight:800}
+.pin-msg{color:var(--muted);font-size:0.85rem;text-align:center;line-height:1.5;max-width:230px}
+.pininput{width:130px;letter-spacing:8px;text-align:center;font-size:1.3rem;font-family:'DM Mono',monospace;padding:9px;background:var(--s2);border:2px solid var(--border);color:var(--text);border-radius:10px;outline:none}
+.pininput:focus{border-color:var(--accent)}
+.pin-hint{font-size:0.7rem;color:var(--muted)}
+
+/* ADMIN */
+.aentry{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:9px}
+.atitle{font-weight:700;font-size:0.88rem;color:var(--accent);margin-bottom:7px}
+.arow{font-size:0.8rem;padding:3px 0;border-bottom:1px solid var(--border)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--text);color:var(--bg);padding:9px 20px;border-radius:28px;z-index:600;font-weight:700;font-size:0.8rem;opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;white-space:nowrap;max-width:90vw;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* SECTION HEAD */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.sh-title{font-size:1.15rem;font-weight:800}
+
+@media(max-width:580px){.r2{grid-template-columns:1fr}.hbtn span{display:none}.hbtn{padding:6px 8px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏜️ <span id="logoTxt">Desert Hisab</span></div>
+  <div class="hdr">
+    <div style="display:flex;gap:4px;align-items:center">
+      <div class="tdot on" style="background:#D4500A" title="Desert" onclick="setTheme('desert',this)"></div>
+      <div class="tdot" style="background:#0A6EA8" title="Ocean" onclick="setTheme('ocean',this)"></div>
+      <div class="tdot" style="background:#E8EAF0;border:2px solid #384050" title="Night" onclick="setTheme('night',this)"></div>
+    </div>
+    <button class="hbtn" onclick="toggleLang()">🌐 <span id="langBtnTxt">हिंदी</span></button>
+    <button class="hbtn" onclick="openModal('adminLoginModal')">🛡️ <span id="t_admin">Admin</span></button>
+    <button class="hbtn" id="userBtn">👤 <span id="hUserName">Devkaran</span></button>
+  </div>
+</header>
+
+<div class="mtabs">
+  <button class="mtab on" id="tab-grp" onclick="switchTab('grp')">
+    <span class="ti">👥</span><span id="t_gtab">Group Hisab</span>
+  </button>
+  <button class="mtab" id="tab-pers" onclick="switchTab('pers')">
+    <span class="ti">👤</span><span id="t_ptab">Personal Hisab</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+
+<!-- GROUP MODE -->
+<div id="grpMode">
+  <!-- List view -->
+  <div id="grpList">
+    <div class="sh">
+      <div class="sh-title" id="t_mygrps">📋 My Groups</div>
+      <button class="btn btn-ac btn-sm" id="newGrpOpenBtn">➕ <span id="t_newgrp">New Group</span></button>
+    </div>
+    <div id="grpCards"></div>
+  </div>
+
+  <!-- Detail view -->
+  <div id="grpDetail" style="display:none">
+    <div class="btns-row" style="margin-bottom:14px">
+      <button class="btn btn-gh btn-sm" onclick="backToList()">← <span id="t_back">Back</span></button>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:1.1rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dGrpName"></div>
+        <div style="font-size:0.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dGrpMembers"></div>
+      </div>
+      <button class="btn btn-gh btn-sm" onclick="openSplit()">⚖️ <span id="t_split">Split</span></button>
+      <button class="btn-pdf btn-sm" onclick="dlGrpPDF()">📄 PDF</button>
+      <button class="btn-wa btn-sm" onclick="shareWA()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.553 4.122 1.523 5.857L.057 24l6.294-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.006-1.373l-.358-.213-3.722.977.993-3.63-.234-.371A9.775 9.775 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182 17.42 2.182 21.818 6.58 21.818 12c0 5.42-4.398 9.818-9.818 9.818z"/></svg>
+        WhatsApp
+      </button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sl" id="t_total">Total</div><div class="sv" style="color:var(--accent)" id="dTotal">0</div></div>
+      <div class="stat"><div class="sl" id="t_mypaid">My Paid</div><div class="sv" style="color:var(--blue)" id="dMyP">0</div></div>
+      <div class="stat"><div class="sl" id="t_bal">Balance</div><div class="sv" id="dBal">0</div></div>
+      <div class="stat"><div class="sl" id="t_cnt">Entries</div><div class="sv" id="dCnt">0</div></div>
+    </div>
+    <div class="card card-g">
+      <div class="card-title">➕ <span id="t_addexp">Add Expense</span></div>
+      <div class="r2">
+        <div class="fg"><label id="t_lamount">Amount (₹)</label><input type="number" id="gAmt" placeholder="0" min="0"></div>
+        <div class="fg"><label id="t_lcat">Category</label>
+          <select id="gCat">
+            <option>🍽 Food</option><option>🚗 Travel</option><option>🏨 Stay</option>
+            <option>⛽ Fuel</option><option>🍺 Drinks</option><option>🎡 Fun</option>
+            <option>🛒 Shopping</option><option>💊 Medical</option><option>📦 Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label id="t_ldesc">Description</label><input type="text" id="gDesc" placeholder="Hotel, petrol, khana..."></div>
+      <button class="btn btn-gr btn-full" id="addGBtn">✅ <span id="t_addbtn">Add to Group</span></button>
+    </div>
+    <div class="card">
+      <div class="card-title">📜 <span id="t_allent">All Entries</span></div>
+      <div class="elist" id="gEntries"></div>
+    </div>
+  </div>
+
+  <!-- Private lock -->
+  <div id="grpLock" style="display:none">
+    <div class="card" style="max-width:380px;margin:0 auto">
+      <div class="pinscr">
+        <div class="pin-icon">🔐</div>
+        <div class="pin-title" id="lockGrpName"></div>
+        <div class="pin-msg" id="t_privmsg">This is a private group. Enter the password to see expenses.</div>
+        <input class="pininput" type="password" id="grpPinIn" placeholder="Password">
+        <button class="btn btn-ac" id="grpUnlockBtn">🔓 <span id="t_unlock">Unlock</span></button>
+        <button class="btn btn-gh btn-sm" onclick="backToList()" style="margin-top:4px">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PERSONAL MODE -->
+<div id="persMode" style="display:none">
+  <div id="persLock">
+    <div class="card" style="max-width:360px;margin:0 auto">
+      <div class="pinscr">
+        <div class="pin-icon">🔒</div>
+        <div class="pin-title" id="t_pvault">Personal Vault</div>
+        <div class="pin-msg" id="t_pmsg">Your personal expenses are private. Enter your PIN to see them.</div>
+        <input class="pininput" type="password" id="persPin" maxlength="4" placeholder="••••">
+        <button class="btn btn-ac" id="persUnlockBtn">🔓 <span id="t_unlock2">Unlock</span></button>
+        <div class="pin-hint" id="t_defpin">Default PIN: 1234</div>
+      </div>
+    </div>
+  </div>
+  <div id="persContent" style="display:none">
+    <div class="stats">
+      <div class="stat"><div class="sl" id="t_ptotal">Total Spent</div><div class="sv" style="color:var(--accent)" id="pTotal">0</div></div>
+      <div class="stat"><div class="sl" id="t_pmonth">This Month</div><div class="sv" style="color:var(--blue)" id="pMonth">0</div></div>
+      <div class="stat"><div class="sl" id="t_pcnt">Entries</div><div class="sv" id="pCnt">0</div></div>
+    </div>
+    <div class="card card-p">
+      <div class="card-title">➕ <span id="t_addpers">Add Personal Expense</span></div>
+      <div class="r2">
+        <div class="fg"><label id="t_lamount2">Amount (₹)</label><input type="number" id="pAmt" placeholder="0" min="0"></div>
+        <div class="fg"><label id="t_lcat2">Category</label>
+          <select id="pCat">
+            <option>🍽 Food</option><option>🚗 Travel</option><option>🏨 Stay</option>
+            <option>⛽ Fuel</option><option>🛒 Shopping</option><option>💊 Medical</option>
+            <option>🎓 Education</option><option>📦 Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label id="t_ldesc2">Description</label><input type="text" id="pDesc" placeholder="What did you buy?"></div>
+      <button class="btn btn-ac btn-full" id="addPBtn">✅ <span id="t_addbtn2">Add Expense</span></button>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:7px">
+        <div class="card-title" style="margin-bottom:0">📜 <span id="t_myexp">My Expenses</span></div>
+        <div class="btns-row">
+          <button class="btn-pdf btn-sm" onclick="dlPersPDF()">📄 PDF</button>
+          <button class="btn btn-gh btn-sm" id="persLockBtn">🔒 <span id="t_lock">Lock</span></button>
+        </div>
+      </div>
+      <div class="elist" id="pEntries"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- MODALS -->
+<!-- New Group -->
+<div class="overlay" id="newGrpModal">
+  <div class="modal">
+    <div class="mtitle">🆕 <span id="t_creategrp">Create New Group</span></div>
+    <div class="fg"><label id="t_gnlbl">Group Name</label><input type="text" id="ngName" placeholder="Goa Trip, Flat Rent..."></div>
+    <div class="fg"><label id="t_gtlbl">Group Type</label>
+      <select id="ngType" onchange="togglePassField()">
+        <option value="public" id="t_pub">🌍 Public — Everyone can see</option>
+        <option value="private" id="t_priv">🔒 Private — Need password</option>
+      </select>
+    </div>
+    <div class="fg" id="ngPassField" style="display:none">
+      <label id="t_gplbl">Group Password</label>
+      <input type="text" id="ngPass" placeholder="Set a group password">
+    </div>
+    <div class="fg"><label id="t_selmem">Select Members</label><div class="mgrid" id="ngMemGrid"></div></div>
+    <div class="fg" style="margin-top:6px"><label id="t_addmemlbl">Add New Member</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="newMemName" placeholder="Name..." style="flex:1">
+        <button class="btn btn-gh btn-sm" onclick="addMemToGrid()">Add</button>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeModal('newGrpModal')" id="t_cancel">Cancel</button>
+      <button class="btn btn-ac" onclick="createGroup()">✅ <span id="t_create">Create</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="overlay" id="userModal">
+  <div class="modal">
+    <div class="mtitle">👥 <span id="t_whoareyou">Who are you?</span></div>
+    <div class="ulist" id="userList"></div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeModal('userModal')" id="t_close">Close</button>
+      <button class="btn btn-ac" onclick="addNewUser()">➕ <span id="t_newuser">New User</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login -->
+<div class="overlay" id="adminLoginModal">
+  <div class="modal">
+    <div class="mtitle">🛡️ <span id="t_adminlogin">Admin Login</span></div>
+    <div class="fg"><label id="t_adminplbl">Admin Password</label><input type="password" id="adminPass" placeholder="Enter admin password"></div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeModal('adminLoginModal')">Cancel</button>
+      <button class="btn btn-ac" onclick="adminLogin()">🔓 Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div class="overlay" id="adminPanel">
+  <div class="modal" style="width:min(95vw,580px)">
+    <div class="mtitle">🛡️ Admin — Full Data</div>
+    <div id="adminBody" style="max-height:58vh;overflow-y:auto"></div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeModal('adminPanel')">Close</button>
+      <button class="btn-pdf" onclick="dlAdminPDF()">📄 Export PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Split Modal -->
+<div class="overlay" id="splitModal">
+  <div class="modal">
+    <div class="mtitle">⚖️ <span id="t_splittitle">Split Summary / Hisab Barabari</span></div>
+    <div id="splitBody"></div>
+    <div class="mfoot">
+      <button class="btn btn-gh" onclick="closeModal('splitModal')">Close</button>
+      <button class="btn-wa" onclick="shareWA();closeModal('splitModal')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.553 4.122 1.523 5.857L.057 24l6.294-1.652A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.006-1.373l-.358-.213-3.722.977.993-3.63-.234-.371A9.775 9.775 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182 17.42 2.182 21.818 6.58 21.818 12c0 5.42-4.398 9.818-9.818 9.818z"/></svg>
+        Share
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── TRANSLATIONS ── */
+const T={
+  en:{logoTxt:'Desert Hisab',langBtnTxt:'हिंदी',t_admin:'Admin',t_gtab:'Group Hisab',t_ptab:'Personal Hisab',t_mygrps:'📋 My Groups',t_newgrp:'New Group',t_back:'Back',t_split:'Split',t_total:'Total',t_mypaid:'My Paid',t_bal:'Balance',t_cnt:'Entries',t_addexp:'Add Expense',t_lamount:'Amount (₹)',t_lcat:'Category',t_ldesc:'Description',t_addbtn:'Add to Group',t_allent:'All Entries',t_privmsg:'This is a private group. Enter the password to see expenses.',t_unlock:'Unlock',t_pvault:'Personal Vault',t_pmsg:'Your personal expenses are private. Enter your 4-digit PIN.',t_defpin:'Default PIN: 1234',t_addpers:'Add Personal Expense',t_lamount2:'Amount (₹)',t_lcat2:'Category',t_ldesc2:'Description',t_addbtn2:'Add Expense',t_myexp:'My Expenses',t_lock:'Lock',t_unlock2:'Unlock',t_creategrp:'Create New Group',t_gnlbl:'Group Name',t_gtlbl:'Group Type',t_pub:'🌍 Public — Everyone can see',t_priv:'🔒 Private — Need password',t_gplbl:'Group Password',t_selmem:'Select Members',t_addmemlbl:'Add New Member',t_cancel:'Cancel',t_create:'Create',t_whoareyou:'Who are you?',t_close:'Close',t_newuser:'New User',t_adminlogin:'Admin Login',t_adminplbl:'Admin Password',t_splittitle:'Split Summary',t_ptotal:'Total Spent',t_pmonth:'This Month',t_pcnt:'Entries'},
+  hi:{logoTxt:'डेजर्ट हिसाब',langBtnTxt:'English',t_admin:'एडमिन',t_gtab:'ग्रुप हिसाब',t_ptab:'पर्सनल हिसाब',t_mygrps:'📋 मेरे ग्रुप',t_newgrp:'नया ग्रुप',t_back:'वापस',t_split:'बराबर बाँटो',t_total:'कुल',t_mypaid:'मैंने दिया',t_bal:'बकाया',t_cnt:'एंट्री',t_addexp:'खर्च जोड़ें',t_lamount:'रकम (₹)',t_lcat:'कैटेगरी',t_ldesc:'क्या था?',t_addbtn:'ग्रुप में जोड़ें',t_allent:'सभी एंट्री',t_privmsg:'यह प्राइवेट ग्रुप है। पासवर्ड डालें।',t_unlock:'खोलो',t_pvault:'पर्सनल तिजोरी',t_pmsg:'आपके खर्चे प्राइवेट हैं। PIN डालें।',t_defpin:'डिफॉल्ट PIN: 1234',t_addpers:'खर्च जोड़ें',t_lamount2:'रकम (₹)',t_lcat2:'कैटेगरी',t_ldesc2:'विवरण',t_addbtn2:'जोड़ें',t_myexp:'मेरे खर्चे',t_lock:'बंद करो',t_unlock2:'खोलो',t_creategrp:'नया ग्रुप बनाएं',t_gnlbl:'ग्रुप का नाम',t_gtlbl:'ग्रुप टाइप',t_pub:'🌍 पब्लिक — सब देख सकते हैं',t_priv:'🔒 प्राइवेट — पासवर्ड चाहिए',t_gplbl:'ग्रुप पासवर्ड',t_selmem:'मेंबर चुनें',t_addmemlbl:'नया मेंबर',t_cancel:'रद्द करें',t_create:'बनाएं',t_whoareyou:'आप कौन हैं?',t_close:'बंद',t_newuser:'नया यूजर',t_adminlogin:'एडमिन लॉगिन',t_adminplbl:'एडमिन पासवर्ड',t_splittitle:'खर्च बँटवारा',t_ptotal:'कुल खर्च',t_pmonth:'इस महीने',t_pcnt:'एंट्री'}
+};
+let lang='en';
+function applyLang(){const t=T[lang];Object.keys(t).forEach(k=>{const e=document.getElementById(k);if(e)e.textContent=t[k];});document.documentElement.setAttribute('data-lang',lang);}
+function toggleLang(){lang=lang==='en'?'hi':'en';applyLang();S.lang=lang;save();}
+
+/* ── THEME ── */
+function setTheme(name,dot){
+  document.documentElement.setAttribute('data-theme',name);
+  document.querySelectorAll('.tdot').forEach(d=>d.classList.remove('on'));
+  dot.classList.add('on');
+  S.theme=name;save();
+}
+
+/* ── STATE ── */
+const ADMIN_PASS='22ESGCS031';
+const DEF_USERS=['Devkaran','Ajay','Narendra','Mukesh','Amit','Harshit','Ashutosh','Harshwardhan','Deepak','Aman'];
+const AVC=['av0','av1','av2','av3','av4','av5','av6','av7','av8','av9'];
+let S={users:[...DEF_USERS],cur:'Devkaran',groups:{},personal:{},punlocked:{},gunlocked:{},curGrp:null,theme:'desert',lang:'en',tab:'grp'};
+
+function save(){try{localStorage.setItem('dh2',JSON.stringify(S));}catch(e){}}
+function load(){
+  try{
+    const r=localStorage.getItem('dh2');if(!r)return;
+    const p=JSON.parse(r);
+    const extra=(p.users||[]).filter(u=>!DEF_USERS.includes(u));
+    p.users=[...DEF_USERS,...extra];
+    if(!p.users.includes(p.cur))p.cur=DEF_USERS[0];
+    p.punlocked={};p.gunlocked={};
+    Object.assign(S,p);
+  }catch(e){}
+}
+
+const fmt=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const today=()=>new Date().toISOString().slice(0,10);
+const thisMonth=()=>new Date().toISOString().slice(0,7);
+const ini=n=>(n||'?').trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const avc=n=>{const i=S.users.indexOf(n);return AVC[(i>=0?i:0)%AVC.length];};
+
+/* ── BOOT ── */
+load();
+// clear old storage keys from v1
+['dh_v1','ss_v3','ss_v4'].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+// seed group if empty
+if(!Object.keys(S.groups).length){
+  const k=uid();
+  S.groups[k]={name:'Desert Gang Trip',type:'public',pass:'',members:[...DEF_USERS],entries:[],by:'Devkaran'};
+  S.gunlocked[k]=true;
+}
+// apply theme
+document.documentElement.setAttribute('data-theme',S.theme||'desert');
+document.documentElement.setAttribute('data-lang',S.lang||'en');
+lang=S.lang||'en';
+const tmap={desert:0,ocean:1,night:2};
+document.querySelectorAll('.tdot').forEach((d,i)=>{d.classList.toggle('on',i===(tmap[S.theme]||0));});
+applyLang();
+document.getElementById('hUserName').textContent=S.cur;
+if(S.tab==='pers')switchTab('pers',true);
+renderGrpCards();
+
+/* ── TABS ── */
+function switchTab(t,silent){
+  S.tab=t;
+  document.getElementById('grpMode').style.display=t==='grp'?'block':'none';
+  document.getElementById('persMode').style.display=t==='pers'?'block':'none';
+  document.getElementById('tab-grp').classList.toggle('on',t==='grp');
+  document.getElementById('tab-pers').classList.toggle('on',t==='pers');
+  if(t==='pers')renderPers();
+  if(!silent)save();
+}
+
+/* ── USER ── */
+document.getElementById('userBtn').addEventListener('click',()=>{buildUserList();openModal('userModal');});
+function buildUserList(){
+  document.getElementById('userList').innerHTML=S.users.map((u,i)=>`
+    <div class="uopt ${u===S.cur?'on':''}" onclick="switchUser('${u.replace(/'/g,"\\'")}')">
+      <div class="av ${AVC[i%AVC.length]}">${ini(u)}</div>
+      <div class="un">${u}</div>
+      ${u===S.cur?'<span style="color:var(--accent);font-weight:700;font-size:0.75rem">● You</span>':''}
+    </div>`).join('');
+}
+window.switchUser=function(name){
+  S.cur=name;S.punlocked={};
+  document.getElementById('hUserName').textContent=name;
+  closeModal('userModal');
+  renderPers();save();
+  showToast(`👋 Hello ${name}!`);
+};
+function addNewUser(){
+  const nm=prompt(lang==='hi'?'नया यूजर का नाम:':'New user name:');
+  if(!nm||!nm.trim())return;
+  const n=nm.trim();
+  if(!S.users.includes(n))S.users.push(n);
+  window.switchUser(n);buildUserList();
+}
+
+/* ── GROUP CARDS ── */
+function renderGrpCards(){
+  const el=document.getElementById('grpCards');
+  const keys=Object.keys(S.groups);
+  if(!keys.length){el.innerHTML=`<div class="empty"><span class="ei-icon">📭</span>${lang==='hi'?'कोई ग्रुप नहीं। नया बनाएं!':'No groups yet. Create one!'}</div>`;return;}
+  el.innerHTML=keys.map(k=>{
+    const g=S.groups[k];
+    const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+    return `<div class="gc ${g.type}" onclick="openGrp('${k}')">
+      <div style="flex:1;min-width:0">
+        <div class="gn">${g.type==='private'?'🔒 ':''} ${g.name}</div>
+        <div class="gi">👥 ${g.members.length} members · ${g.entries.length} ${lang==='hi'?'एंट्री':'entries'} · ${g.type==='public'?'🌍 Public':'🔒 Private'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="gt">${fmt(tot)}</div>
+        <div style="font-size:0.68rem;color:var(--muted)">${lang==='hi'?'कुल':'Total'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── OPEN GROUP ── */
+function openGrp(id){
+  const g=S.groups[id];if(!g)return;
+  S.curGrp=id;
+  if(g.type==='private'&&!S.gunlocked[id]){
+    document.getElementById('grpList').style.display='none';
+    document.getElementById('grpDetail').style.display='none';
+    document.getElementById('grpLock').style.display='block';
+    document.getElementById('lockGrpName').textContent=g.name;
+    document.getElementById('grpPinIn').value='';
+    document.getElementById('grpUnlockBtn').onclick=function(){
+      const v=document.getElementById('grpPinIn').value;
+      if(v===g.pass){S.gunlocked[id]=true;showGrpDetail(id);}
+      else{showToast(lang==='hi'?'❌ गलत पासवर्ड':'❌ Wrong password');document.getElementById('grpPinIn').value='';}
+    };
+    return;
+  }
+  showGrpDetail(id);
+}
+function showGrpDetail(id){
+  const g=S.groups[id];
+  document.getElementById('grpList').style.display='none';
+  document.getElementById('grpLock').style.display='none';
+  document.getElementById('grpDetail').style.display='block';
+  document.getElementById('dGrpName').textContent=(g.type==='private'?'🔒 ':'')+g.name;
+  document.getElementById('dGrpMembers').textContent='👥 '+g.members.join(' · ');
+  renderGrpDetail(id);
+}
+function backToList(){
+  document.getElementById('grpDetail').style.display='none';
+  document.getElementById('grpLock').style.display='none';
+  document.getElementById('grpList').style.display='block';
+  S.curGrp=null;renderGrpCards();
+}
+function renderGrpDetail(id){
+  const g=S.groups[id||S.curGrp];if(!g)return;
+  const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+  const myP=g.entries.filter(e=>e.user===S.cur).reduce((s,e)=>s+Number(e.amt),0);
+  const n=g.members.length||1;
+  const bal=myP-tot/n;
+  document.getElementById('dTotal').textContent=fmt(tot);
+  document.getElementById('dMyP').textContent=fmt(myP);
+  document.getElementById('dBal').textContent=(bal>=0?'+':'')+fmt(Math.round(bal));
+  document.getElementById('dBal').style.color=bal>=0?'var(--green)':'var(--accent)';
+  document.getElementById('dCnt').textContent=g.entries.length;
+  const el=document.getElementById('gEntries');
+  if(!g.entries.length){el.innerHTML=`<div class="empty"><span class="ei-icon">🧾</span>${lang==='hi'?'अभी कोई एंट्री नहीं':'No entries yet'}</div>`;return;}
+  el.innerHTML=g.entries.slice().reverse().map(e=>`
+    <div class="ei">
+      <div class="el">
+        <div class="ew"><div class="av av-s ${avc(e.user)}">${ini(e.user)}</div>${e.user} · ${e.cat}</div>
+        <div class="ed">${e.desc}</div><div class="em">${e.date}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div class="ea">${fmt(e.amt)}</div>
+        ${e.user===S.cur?`<button class="delbtn" onclick="delGE('${e.id}')">✕</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+/* ── ADD GROUP ENTRY ── */
+document.getElementById('addGBtn').addEventListener('click',()=>{
+  const g=S.groups[S.curGrp];if(!g)return;
+  const amt=parseFloat(document.getElementById('gAmt').value);
+  const desc=document.getElementById('gDesc').value.trim();
+  if(!amt||amt<=0){showToast(lang==='hi'?'⚠ रकम डालें':'⚠ Enter amount');return;}
+  if(!desc){showToast(lang==='hi'?'⚠ विवरण डालें':'⚠ Enter description');return;}
+  if(!g.members.includes(S.cur)){showToast(lang==='hi'?'⚠ आप इस ग्रुप के मेंबर नहीं':'⚠ You are not in this group');return;}
+  g.entries.push({id:uid(),user:S.cur,amt,desc,cat:document.getElementById('gCat').value,date:today()});
+  document.getElementById('gAmt').value='';document.getElementById('gDesc').value='';
+  save();renderGrpDetail(S.curGrp);
+  showToast(lang==='hi'?'✅ एंट्री जुड़ गई!':'✅ Entry added!');
+});
+document.getElementById('gDesc').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addGBtn').click();});
+window.delGE=function(id){
+  S.groups[S.curGrp].entries=S.groups[S.curGrp].entries.filter(e=>e.id!==id);
+  save();renderGrpDetail(S.curGrp);showToast('🗑');
+};
+
+/* ── CREATE GROUP ── */
+document.getElementById('newGrpOpenBtn').addEventListener('click',()=>{
+  buildNgGrid();document.getElementById('ngName').value='';document.getElementById('ngPass').value='';
+  document.getElementById('ngType').value='public';togglePassField();openModal('newGrpModal');
+});
+function togglePassField(){document.getElementById('ngPassField').style.display=document.getElementById('ngType').value==='private'?'block':'none';}
+function buildNgGrid(){
+  document.getElementById('ngMemGrid').innerHTML=S.users.map((u,i)=>`
+    <label class="mc ${u===S.cur?'on':''}" data-n="${u}">
+      <input type="checkbox" value="${u}" ${u===S.cur?'checked':''}>
+      <div class="av av-s ${AVC[i%AVC.length]}">${ini(u)}</div>
+      <span class="mcn">${u}</span>
+    </label>`).join('');
+  document.querySelectorAll('#ngMemGrid .mc').forEach(l=>{
+    const cb=l.querySelector('input');
+    l.addEventListener('click',()=>{cb.checked=!cb.checked;l.classList.toggle('on',cb.checked);});
+  });
+}
+function addMemToGrid(){
+  const nm=document.getElementById('newMemName').value.trim();
+  if(!nm){showToast('Enter a name');return;}
+  if(!S.users.includes(nm))S.users.push(nm);
+  document.getElementById('newMemName').value='';
+  buildNgGrid();
+  setTimeout(()=>{const c=document.querySelector(`#ngMemGrid .mc[data-n="${nm}"]`);if(c&&!c.classList.contains('on'))c.click();},50);
+  showToast(`${nm} added`);
+}
+function createGroup(){
+  const name=document.getElementById('ngName').value.trim();
+  if(!name){showToast(lang==='hi'?'नाम डालें':'Enter a name');return;}
+  const type=document.getElementById('ngType').value;
+  const pass=document.getElementById('ngPass').value.trim();
+  if(type==='private'&&!pass){showToast(lang==='hi'?'पासवर्ड डालें':'Enter a password');return;}
+  const sel=[...document.querySelectorAll('#ngMemGrid input:checked')].map(i=>i.value);
+  if(!sel.length){showToast(lang==='hi'?'मेंबर चुनें':'Select members');return;}
+  if(!sel.includes(S.cur))sel.unshift(S.cur);
+  const k=uid();
+  S.groups[k]={name,type,pass,members:sel,entries:[],by:S.cur};
+  if(type==='public')S.gunlocked[k]=true;
+  closeModal('newGrpModal');save();renderGrpCards();
+  showToast(lang==='hi'?`"${name}" बन गया ✅`:`"${name}" created ✅`);
+}
+
+/* ── SPLIT ── */
+function openSplit(){
+  const g=S.groups[S.curGrp];if(!g)return;
+  const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+  const n=g.members.length||1;const per=tot/n;
+  const paid={};g.members.forEach(m=>paid[m]=0);
+  g.entries.forEach(e=>{paid[e.user]=(paid[e.user]||0)+Number(e.amt);});
+  let html=`<div style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--muted);margin-bottom:12px;padding:10px;background:var(--s2);border-radius:10px">${lang==='hi'?'कुल':'Total'}: <strong>${fmt(tot)}</strong> · ${n} ${lang==='hi'?'लोग':'people'} · ${lang==='hi'?'प्रति व्यक्ति':'per person'}: <strong>${fmt(Math.round(per))}</strong></div>`;
+  g.members.forEach((m,i)=>{
+    const b=(paid[m]||0)-per;const col=b>=0?'var(--green)':'var(--accent)';
+    const lbl=b>=0?(lang==='hi'?`✅ ${fmt(Math.round(b))} वापस मिलेंगे`:`✅ gets back ${fmt(Math.round(b))}`):(lang==='hi'?`❗ ${fmt(Math.round(Math.abs(b)))} देना है`:`❗ owes ${fmt(Math.round(Math.abs(b)))}`);
+    html+=`<div class="srow"><span class="sname"><div class="av av-s ${AVC[i%AVC.length]}">${ini(m)}</div>${m}</span><span class="samt" style="color:${col}">${lbl}</span></div>`;
+  });
+  document.getElementById('splitBody').innerHTML=html;openModal('splitModal');
+}
+
+/* ── PERSONAL ── */
+function renderPers(){
+  const u=S.cur;const unlocked=S.punlocked[u];
+  document.getElementById('persLock').style.display=unlocked?'none':'block';
+  document.getElementById('persContent').style.display=unlocked?'block':'none';
+  if(unlocked)renderPersEntries();
+}
+document.getElementById('persUnlockBtn').addEventListener('click',()=>{
+  const u=S.cur;if(!S.personal[u])S.personal[u]={entries:[],pin:'1234'};
+  const pin=document.getElementById('persPin').value;
+  if(pin===S.personal[u].pin){
+    S.punlocked[u]=true;
+    document.getElementById('persLock').style.display='none';
+    document.getElementById('persContent').style.display='block';
+    renderPersEntries();showToast(lang==='hi'?'🔓 तिजोरी खुली!':'🔓 Vault unlocked!');
+  }else{showToast(lang==='hi'?'❌ गलत PIN':'❌ Wrong PIN');document.getElementById('persPin').value='';}
+});
+document.getElementById('persPin').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('persUnlockBtn').click();});
+document.getElementById('persLockBtn').addEventListener('click',()=>{
+  delete S.punlocked[S.cur];document.getElementById('persPin').value='';renderPers();
+  showToast(lang==='hi'?'🔒 बंद हो गई':'🔒 Locked');
+});
+document.getElementById('addPBtn').addEventListener('click',()=>{
+  const u=S.cur;if(!S.personal[u])S.personal[u]={entries:[],pin:'1234'};
+  const amt=parseFloat(document.getElementById('pAmt').value);
+  const desc=document.getElementById('pDesc').value.trim();
+  if(!amt||amt<=0){showToast(lang==='hi'?'⚠ रकम डालें':'⚠ Enter amount');return;}
+  if(!desc){showToast(lang==='hi'?'⚠ विवरण डालें':'⚠ Enter description');return;}
+  S.personal[u].entries.push({id:uid(),amt,desc,cat:document.getElementById('pCat').value,date:today()});
+  document.getElementById('pAmt').value='';document.getElementById('pDesc').value='';
+  save();renderPersEntries();showToast(lang==='hi'?'✅ जुड़ गया!':'✅ Added!');
+});
+document.getElementById('pDesc').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addPBtn').click();});
+function renderPersEntries(){
+  const u=S.cur;if(!S.personal[u])S.personal[u]={entries:[],pin:'1234'};
+  const entries=S.personal[u].entries;
+  const tot=entries.reduce((s,e)=>s+Number(e.amt),0);
+  const mon=entries.filter(e=>e.date.startsWith(thisMonth())).reduce((s,e)=>s+Number(e.amt),0);
+  document.getElementById('pTotal').textContent=fmt(tot);
+  document.getElementById('pMonth').textContent=fmt(mon);
+  document.getElementById('pCnt').textContent=entries.length;
+  const el=document.getElementById('pEntries');
+  if(!entries.length){el.innerHTML=`<div class="empty"><span class="ei-icon">💸</span>${lang==='hi'?'कोई पर्सनल खर्च नहीं':'No personal expenses yet'}</div>`;return;}
+  el.innerHTML=entries.slice().reverse().map(e=>`
+    <div class="ei">
+      <div class="el"><div class="ew">${e.cat}</div><div class="ed">${e.desc}</div><div class="em">${e.date}</div></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div class="ea">${fmt(e.amt)}</div>
+        <button class="delbtn" onclick="delPE('${e.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+window.delPE=function(id){
+  if(S.personal[S.cur])S.personal[S.cur].entries=S.personal[S.cur].entries.filter(e=>e.id!==id);
+  save();renderPersEntries();showToast('🗑');
+};
+
+/* ── ADMIN ── */
+function adminLogin(){
+  const p=document.getElementById('adminPass').value;
+  if(p===ADMIN_PASS){closeModal('adminLoginModal');buildAdmin();openModal('adminPanel');document.getElementById('adminPass').value='';}
+  else{showToast('❌ Wrong admin password');document.getElementById('adminPass').value='';}
+}
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin();});
+function buildAdmin(){
+  let html=`<div style="font-size:0.8rem;color:var(--muted);background:var(--s2);padding:10px;border-radius:9px;margin-bottom:12px">🛡️ Admin — you can see everything</div>`;
+  html+=`<div style="font-size:1rem;font-weight:800;margin-bottom:10px">👥 All Groups</div>`;
+  Object.entries(S.groups).forEach(([k,g])=>{
+    const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+    html+=`<div class="aentry"><div class="atitle">${g.name} · ${g.type} · ${fmt(tot)}</div>`;
+    if(g.entries.length){g.entries.forEach(e=>{html+=`<div class="arow"><strong>${e.user}</strong>: ${fmt(e.amt)} — ${e.desc} [${e.cat}] <span style="color:var(--muted)">${e.date}</span></div>`;});}
+    else{html+=`<div style="font-size:0.8rem;color:var(--muted)">No entries</div>`;}
+    html+=`</div>`;
+  });
+  html+=`<div style="font-size:1rem;font-weight:800;margin:12px 0 10px">🔒 Personal Expenses</div>`;
+  let anyPers=false;
+  Object.entries(S.personal).forEach(([u,d])=>{
+    if(!d.entries.length)return;anyPers=true;
+    const tot=d.entries.reduce((s,e)=>s+Number(e.amt),0);
+    html+=`<div class="aentry"><div class="atitle">${u} — ${fmt(tot)}</div>`;
+    d.entries.forEach(e=>{html+=`<div class="arow">${fmt(e.amt)} — ${e.desc} [${e.cat}] <span style="color:var(--muted)">${e.date}</span></div>`;});
+    html+=`</div>`;
+  });
+  if(!anyPers)html+=`<div style="font-size:0.85rem;color:var(--muted);padding:8px">No personal expenses yet</div>`;
+  document.getElementById('adminBody').innerHTML=html;
+}
+
+/* ── PDF ── */
+function dlGrpPDF(){
+  const g=S.groups[S.curGrp];if(!g){showToast('No group');return;}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF();let y=18;
+  doc.setFontSize(17);doc.setFont(undefined,'bold');doc.text(`Desert Hisab — ${g.name}`,14,y);y+=8;
+  doc.setFontSize(9);doc.setFont(undefined,'normal');
+  doc.text(`Type: ${g.type} | Members: ${g.members.join(', ')}`,14,y);y+=6;
+  doc.text(`Date: ${today()} | Created by: ${g.by}`,14,y);y+=10;
+  doc.setFillColor(240,228,210);doc.rect(14,y,182,8,'F');doc.setFont(undefined,'bold');
+  doc.text('Who',15,y+6);doc.text('Description',55,y+6);doc.text('Category',115,y+6);doc.text('Amt',155,y+6);doc.text('Date',172,y+6);y+=11;doc.setFont(undefined,'normal');
+  g.entries.forEach((e,i)=>{
+    if(y>270){doc.addPage();y=18;}
+    if(i%2===0){doc.setFillColor(252,248,242);doc.rect(14,y-4,182,8,'F');}
+    doc.text(e.user.slice(0,14),15,y);doc.text(e.desc.slice(0,28),55,y);doc.text(e.cat.slice(0,14),115,y);doc.text('Rs '+e.amt,155,y);doc.text(e.date,172,y);y+=8;
+  });
+  const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);const per=Math.round(tot/(g.members.length||1));
+  y+=5;doc.setFont(undefined,'bold');doc.text(`Total: Rs ${tot}  |  Per Person: Rs ${per}`,14,y);y+=8;
+  doc.text('Who owes / gets back:',14,y);y+=6;doc.setFont(undefined,'normal');
+  const paid={};g.members.forEach(m=>paid[m]=0);g.entries.forEach(e=>{paid[e.user]=(paid[e.user]||0)+Number(e.amt);});
+  g.members.forEach(m=>{if(y>270){doc.addPage();y=18;}const b=(paid[m]||0)-per;doc.text(`${m}: ${b>=0?`gets back Rs ${Math.round(b)}`:`owes Rs ${Math.round(Math.abs(b))}`}`,14,y);y+=6;});
+  doc.save(`desert-hisab-${g.name.replace(/\s+/g,'-')}.pdf`);showToast('📄 PDF downloaded!');
+}
+function dlPersPDF(){
+  const u=S.cur;if(!S.personal[u]||!S.personal[u].entries.length){showToast('No entries');return;}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF();let y=18;
+  doc.setFontSize(16);doc.setFont(undefined,'bold');doc.text(`Desert Hisab — ${u} Personal Hisab`,14,y);y+=8;
+  doc.setFontSize(9);doc.setFont(undefined,'normal');doc.text(`Date: ${today()}`,14,y);y+=10;
+  doc.setFillColor(240,228,210);doc.rect(14,y,182,8,'F');doc.setFont(undefined,'bold');
+  doc.text('Description',14,y+6);doc.text('Category',105,y+6);doc.text('Amt',148,y+6);doc.text('Date',170,y+6);y+=11;doc.setFont(undefined,'normal');
+  S.personal[u].entries.forEach((e,i)=>{
+    if(y>270){doc.addPage();y=18;}
+    if(i%2===0){doc.setFillColor(252,248,242);doc.rect(14,y-4,182,8,'F');}
+    doc.text(e.desc.slice(0,45),14,y);doc.text(e.cat.slice(0,18),105,y);doc.text('Rs '+e.amt,148,y);doc.text(e.date,170,y);y+=8;
+  });
+  const tot=S.personal[u].entries.reduce((s,e)=>s+Number(e.amt),0);
+  y+=5;doc.setFont(undefined,'bold');doc.text(`Total Spent: Rs ${tot}`,14,y);
+  doc.save(`desert-hisab-personal-${u}.pdf`);showToast('📄 PDF downloaded!');
+}
+function dlAdminPDF(){
+  const {jsPDF}=window.jspdf;const doc=new jsPDF();let y=18;
+  doc.setFontSize(15);doc.setFont(undefined,'bold');doc.text('Desert Hisab — Admin Full Report',14,y);y+=7;
+  doc.setFontSize(8);doc.setFont(undefined,'normal');doc.text(`Generated: ${today()}`,14,y);y+=10;
+  Object.entries(S.groups).forEach(([k,g])=>{
+    if(y>252){doc.addPage();y=18;}
+    const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+    doc.setFont(undefined,'bold');doc.setFontSize(10);doc.text(`GROUP: ${g.name} (${g.type}) — Rs ${tot}`,14,y);y+=6;
+    doc.setFont(undefined,'normal');doc.setFontSize(8);
+    g.entries.forEach(e=>{if(y>270){doc.addPage();y=18;}doc.text(`  ${e.user}: Rs ${e.amt} — ${e.desc} [${e.cat}] ${e.date}`,14,y);y+=5;});y+=3;
+  });
+  Object.entries(S.personal).forEach(([u,d])=>{
+    if(!d.entries.length)return;
+    if(y>252){doc.addPage();y=18;}
+    const tot=d.entries.reduce((s,e)=>s+Number(e.amt),0);
+    doc.setFont(undefined,'bold');doc.setFontSize(10);doc.text(`PERSONAL: ${u} — Rs ${tot}`,14,y);y+=6;
+    doc.setFont(undefined,'normal');doc.setFontSize(8);
+    d.entries.forEach(e=>{if(y>270){doc.addPage();y=18;}doc.text(`  Rs ${e.amt} — ${e.desc} [${e.cat}] ${e.date}`,14,y);y+=5;});y+=3;
+  });
+  doc.save('desert-hisab-admin-full.pdf');showToast('📄 Admin report saved!');
+}
+
+/* ── WHATSAPP ── */
+function shareWA(){
+  const g=S.groups[S.curGrp];if(!g)return;
+  const tot=g.entries.reduce((s,e)=>s+Number(e.amt),0);
+  const n=g.members.length||1;const per=Math.round(tot/n);
+  const paid={};g.members.forEach(m=>paid[m]=0);g.entries.forEach(e=>{paid[e.user]=(paid[e.user]||0)+Number(e.amt);});
+  let txt=`🏜️ *Desert Hisab — ${g.name}*\n👥 Members: ${g.members.join(', ')}\n\n📋 *Kharche:*\n`;
+  g.entries.forEach(e=>{txt+=`• ${e.user}: ₹${e.amt} — ${e.desc}\n`;});
+  txt+=`\n💰 *Total: ₹${tot}* | Per person: ₹${per}\n\n📊 *Hisab:*\n`;
+  g.members.forEach(m=>{const b=(paid[m]||0)-per;txt+=b>=0?`✅ ${m}: ₹${Math.round(b)} wapas milenge\n`:`❗ ${m}: ₹${Math.round(Math.abs(b))} dena hai\n`;});
+  txt+=`\n_Desert Hisab se share kiya_ 🏜️`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+/* ── HELPERS ── */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
+</script>
+</body>
+</html>
